@@ -1,0 +1,65 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - Kirana Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-green-600 text-white p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">Local Kirana - Customer Shop</h1>
+        <a href="/api/logout" class="bg-red-500 px-4 py-2 rounded">Logout</a>
+    </nav>
+
+    <div class="container mx-auto p-6">
+        <h2 class="text-2xl font-semibold mb-4">Available Products</h2>
+        <div id="productList" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Products will load here -->
+        </div>
+    </div>
+
+    <script>
+        async function loadProducts() {
+            try {
+                const res = await fetch('/api/all-products');
+                const products = await res.json();
+                const list = document.getElementById('productList');
+                list.innerHTML = '';
+
+                if (products.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 col-span-3">No products available right now.</p>';
+                    return;
+                }
+
+                products.forEach(p => {
+                    const imgTag = p.image_url 
+                        ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-32 object-cover rounded mb-2">` 
+                        : `<div class="w-full h-32 bg-gray-200 flex items-center justify-center rounded mb-2 text-gray-400 text-sm">No Image</div>`;
+
+                    list.innerHTML += `
+                        <div class="bg-white p-4 rounded shadow flex flex-col justify-between">
+                            <div>
+                                ${imgTag}
+                                <h3 class="font-bold text-lg">${p.name}</h3>
+                                <p class="text-green-600 font-semibold">₹${p.price}</p>
+                                <p class="text-xs text-gray-500">Shop: ${p.shop_name || 'Local Store'}</p>
+                                <p class="text-sm text-gray-500 mb-4">Stock: ${p.stock}</p>
+                            </div>
+                            <button onclick="buyProduct(${p.id}, ${p.price})" class="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700">Buy Now</button>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error('Failed to load products:', err);
+            }
+        }
+
+        async function buyProduct(id, price) {
+            alert('Order placed successfully for item ID: ' + id);
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>

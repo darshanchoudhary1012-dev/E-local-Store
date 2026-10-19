@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirana Store - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <h2 class="text-2xl font-bold mb-6 text-center text-green-600">Kirana Store Portal</h2>
+        
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium">Email</label>
+                <input type="email" id="loginEmail" required class="w-full border px-3 py-2 rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Password</label>
+                <input type="password" id="loginPassword" required class="w-full border px-3 py-2 rounded">
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Login</button>
+        </form>
+
+        <p class="mt-4 text-center text-sm">Don't have an account? <button onclick="toggleForm()" class="text-blue-600 underline">Register here</button></p>
+
+        <!-- Register Form (Hidden by default) -->
+        <form id="registerForm" class="space-y-4 hidden mt-4">
+            <h3 class="font-bold text-lg">Register</h3>
+            <div>
+                <label class="block text-sm font-medium">Name</label>
+                <input type="text" id="regName" required class="w-full border px-3 py-2 rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Email</label>
+                <input type="email" id="regEmail" required class="w-full border px-3 py-2 rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Password</label>
+                <input type="password" id="regPassword" required class="w-full border px-3 py-2 rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Role</label>
+                <select id="regRole" class="w-full border px-3 py-2 rounded">
+                    <option value="customer">Customer</option>
+                    <option value="seller">Seller (Kirana Owner)</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Register</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleForm() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('registerForm').classList.toggle('hidden');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                window.location.href = data.redirect;
+            } else {
+                alert(data.error);
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+
+            const res = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, role })
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+            if (res.ok) toggleForm();
+        });
+    </script>
+</body>
+</html>

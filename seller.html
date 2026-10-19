@@ -1,0 +1,221 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - Kirana Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <div class="w-64 bg-blue-600 text-white flex flex-col justify-between hidden md:flex">
+        <div>
+            <div class="p-5 text-2xl font-bold border-b border-blue-500">🛒 Kirana Admin</div>
+            <nav class="mt-5 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left py-2.5 px-4 bg-blue-700 text-white font-medium">Dashboard</button>
+                <button onclick="switchTab('inventory')" id="nav-inventory" class="w-full text-left py-2.5 px-4 hover:bg-blue-700 text-blue-100">Inventory & Products</button>
+                <button onclick="switchTab('orders')" id="nav-orders" class="w-full text-left py-2.5 px-4 hover:bg-blue-700 text-blue-100">Orders</button>
+                <button onclick="switchTab('settings')" id="nav-settings" class="w-full text-left py-2.5 px-4 hover:bg-blue-700 text-blue-100">Settings</button>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-blue-500">
+            <a href="/api/logout" class="block text-center bg-red-500 py-2 rounded text-white font-medium hover:bg-red-600">Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+            <h2 id="headerTitle" class="text-xl font-bold text-gray-800">Seller Dashboard</h2>
+            <a href="/api/logout" class="md:hidden bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</a>
+        </header>
+
+        <main class="p-6">
+            
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <p class="text-gray-500 text-sm">Total Products Listed</p>
+                        <h3 id="dashTotalCount" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <p class="text-gray-500 text-sm">Shop Status</p>
+                        <h3 class="text-2xl font-bold text-green-600 mt-1">Active (Open)</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <p class="text-gray-500 text-sm">Pending Orders</p>
+                        <h3 class="text-2xl font-bold text-orange-500 mt-1">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INVENTORY TAB -->
+            <div id="tab-inventory" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:col-span-1">
+                    <h3 id="formTitle" class="text-lg font-bold mb-4 text-gray-800">Add New Product</h3>
+                    <form id="addProductForm" class="space-y-4">
+                        <input type="hidden" id="editProductId">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Product Name</label>
+                            <input type="text" id="prodName" required class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Price (₹)</label>
+                            <input type="number" id="prodPrice" required class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Stock Quantity</label>
+                            <input type="number" id="prodStock" required class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Product Image URL</label>
+                            <input type="url" id="prodImage" placeholder="https://example.com/image.jpg" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700">Add Product</button>
+                        <button type="button" id="cancelEditBtn" onclick="resetForm()" class="w-full bg-gray-400 text-white py-2 rounded font-medium hover:bg-gray-500 hidden mt-2">Cancel Edit</button>
+                    </form>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:col-span-2">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800">Manage Inventory</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
+                                    <th class="p-3">Image</th>
+                                    <th class="p-3">Product Name</th>
+                                    <th class="p-3">Price</th>
+                                    <th class="p-3">Stock</th>
+                                    <th class="p-3 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sellerProductsTable" class="text-sm text-gray-700">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ORDERS TAB -->
+            <div id="tab-orders" class="hidden bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 class="text-lg font-bold mb-4">Customer Orders</h3>
+                <p class="text-gray-500">No orders placed yet.</p>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="tab-settings" class="hidden bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 class="text-lg font-bold mb-4">Shop Settings</h3>
+                <p class="text-gray-600">Update shop details here.</p>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        let allProducts = [];
+
+        function switchTab(tabName) {
+            ['dashboard', 'inventory', 'orders', 'settings'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.remove('bg-blue-700', 'text-white');
+                document.getElementById(`nav-${t}`).classList.add('text-blue-100');
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabName}`).classList.add('bg-blue-700', 'text-white');
+            document.getElementById(`nav-${tabName}`).classList.remove('text-blue-100');
+        }
+
+        async function loadSellerProducts() {
+            const res = await fetch('/api/seller-products');
+            if (res.status === 401) { window.location.href = '/index.html'; return; }
+            allProducts = await res.json();
+            document.getElementById('dashTotalCount').innerText = allProducts.length;
+            
+            const tableBody = document.getElementById('sellerProductsTable');
+            tableBody.innerHTML = '';
+
+            if(allProducts.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">No products added yet.</td></tr>`;
+                return;
+            }
+
+            allProducts.forEach(p => {
+                const imgTag = p.image_url 
+                    ? `<img src="${p.image_url}" alt="${p.name}" class="w-12 h-12 object-cover rounded">` 
+                    : `<div class="w-12 h-12 bg-gray-200 flex items-center justify-center rounded text-xs text-gray-500">No Image</div>`;
+
+                tableBody.innerHTML += `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="p-3">${imgTag}</td>
+                        <td class="p-3 font-medium">${p.name}</td>
+                        <td class="p-3 text-green-600 font-semibold">₹${p.price}</td>
+                        <td class="p-3">${p.stock} units</td>
+                        <td class="p-3 text-center space-x-2">
+                            <button onclick="editProduct(${p.id})" class="bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600">Edit</button>
+                            <button onclick="deleteProduct(${p.id})" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editProductId').value;
+            const name = document.getElementById('prodName').value;
+            const price = document.getElementById('prodPrice').value;
+            const stock = document.getElementById('prodStock').value;
+            const image_url = document.getElementById('prodImage').value;
+
+            const url = id ? `/api/products/${id}` : '/api/products';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price, stock, image_url })
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+            resetForm();
+            loadSellerProducts();
+        });
+
+        function editProduct(id) {
+            const product = allProducts.find(p => p.id === id);
+            if (!product) return;
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('prodName').value = product.name;
+            document.getElementById('prodPrice').value = product.price;
+            document.getElementById('prodStock').value = product.stock;
+            document.getElementById('prodImage').value = product.image_url || '';
+            document.getElementById('formTitle').innerText = 'Edit Product';
+            document.getElementById('submitBtn').innerText = 'Update Product';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('addProductForm').reset();
+            document.getElementById('editProductId').value = '';
+            document.getElementById('formTitle').innerText = 'Add New Product';
+            document.getElementById('submitBtn').innerText = 'Add Product';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Kya aap is product ko delete karna chahte hain?')) return;
+            const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.message || data.error);
+            loadSellerProducts();
+        }
+
+        loadSellerProducts();
+    </script>
+</body>
+</html>
